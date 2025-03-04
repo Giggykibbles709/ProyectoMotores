@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Obtener la entrada de movimiento (WASD o flechas)
+        // Obtener el input de movimiento (WASD o flechas)
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
         Vector3 inputVector = new Vector3(moveX, 0f, moveZ).normalized;

@@ -4,10 +4,10 @@ using UnityEngine.AI;
 public class ZombieAI : MonoBehaviour
 {
     public Transform player; // Referencia al jugador
-    public float fieldOfView = 180f; // Campo de visión del zombi (en grados)
+    public float fieldOfView = 180f; // Campo de visión del zombie
     public float detectionRange = 10f; // Rango máximo de detección del jugador
-    public float chaseSpeed = 3.5f; // Velocidad cuando persigue al jugador
-    public float patrolSpeed = 2f; // Velocidad cuando no persigue al jugador
+    public float chaseSpeed = 7f; // Velocidad cuando persigue al jugador
+    public float patrolSpeed = 5f; // Velocidad cuando no persigue al jugador
 
     public float patrolRadius = 15f; // Radio dentro del cual se generan puntos aleatorios
     private Vector3 randomPatrolPoint; // Punto de patrullaje generado aleatoriamente
@@ -122,5 +122,21 @@ public class ZombieAI : MonoBehaviour
         {
             randomPatrolPoint = hit.position;
         }
+    }
+
+    // Visualización en el editor
+    private void OnDrawGizmosSelected()
+    {
+        // Dibujar el rango de detección como un círculo
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
+
+        // Dibujar el campo de visión
+        Gizmos.color = Color.blue;
+        Vector3 leftBoundary = Quaternion.Euler(0, -fieldOfView * 0.5f, 0) * transform.forward * detectionRange;
+        Vector3 rightBoundary = Quaternion.Euler(0, fieldOfView * 0.5f, 0) * transform.forward * detectionRange;
+
+        Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
+        Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
     }
 }
