@@ -17,6 +17,7 @@ public class CubeGameLoop : MonoBehaviour
         // Rotación con las teclas A y D.
         // Usamos Time.deltaTime para que la velocidad de rotación sea consistente.
         float rotate = Input.GetAxis("Horizontal") * rotateSpeed * Time.deltaTime;
+        //Usamos Mathf.Abs para devolver el valor absoluto del input del jugador.
         if (Mathf.Abs(Input.GetAxis("Horizontal")) > 0.01f) // Detectar si hay input en el eje horizontal
         {
             isManualRotation = true; // Activar bool de rotación manual
