@@ -14,7 +14,7 @@ public class ZombieAI : MonoBehaviour
 
     private NavMeshAgent navMeshAgent;
     private bool isChasing = false;
-    private float stoppingDistance = 2f;
+    private float stoppingDistance = 2f; // Distancia de detención frente al jugador
 
     private void Start()
     {
@@ -59,7 +59,7 @@ public class ZombieAI : MonoBehaviour
         // Producto escalar para calcular el coseno del ángulo
         float dotProduct = Vector3.Dot(zombieForward, directionToPlayer);
 
-        // Calcular el coseno del FOV dividido por 2
+        // Calcular el coseno del FOV dividido entre 2
         float cosFOV = Mathf.Cos(fieldOfView * 0.5f * Mathf.Deg2Rad);
 
         // Verificar si el jugador está dentro del FOV
@@ -68,16 +68,18 @@ public class ZombieAI : MonoBehaviour
 
     private void StartChase()
     {
+        // Comienza a perseguirlo aumentando su velocidad
         if (!isChasing)
         {
             isChasing = true;
             navMeshAgent.speed = chaseSpeed;
         }
 
+        // Calcula la distancia al jugador para acercarse a el sin atravesarlo
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         if (distanceToPlayer > stoppingDistance)
         {
-            navMeshAgent.SetDestination(player.position); //Persigue al jugador
+            navMeshAgent.SetDestination(player.position); // Persigue al jugador
 
             // Reducir la velocidad si está muy cerca del jugador
             navMeshAgent.speed = Mathf.Lerp(0.5f, 3f, distanceToPlayer / stoppingDistance);
@@ -93,7 +95,7 @@ public class ZombieAI : MonoBehaviour
         if (isChasing)
         {
             isChasing = false;
-            navMeshAgent.speed = patrolSpeed;
+            navMeshAgent.speed = patrolSpeed; // Vuelve a su velocidad normal
             GenerateRandomPatrolPoint(); // Generar un nuevo punto al detener la persecución
         }
     }
