@@ -18,7 +18,7 @@ public class ZombieAI : MonoBehaviour
 
     private void Start()
     {
-        // Obtener el NavMeshAgent
+        // Obtener el NavMeshAgent para asignar el terreno por el que camina
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.speed = patrolSpeed;
 
