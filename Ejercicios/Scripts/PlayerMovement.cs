@@ -2,69 +2,39 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f; // Velocidad de movimiento del personaje
-    public float rotationSpeed = 10f; // Velocidad de rotación del personaje
+    public float moveSpeed = 5f;
+    public float jumpForce = 5f;
+    private Rigidbody rb;
 
-    private float playerRadius = 0.5f; // Radio del jugador para la detección de colisiones
-    private float playerHeight = 2f; // Altura del jugador para la detección de colisiones
+    private bool isGrounded;
 
-    void Update()
+    private void Start()
     {
-        // Obtener el input de movimiento (WASD o flechas)
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
-        Vector3 inputVector = new Vector3(moveX, 0f, moveZ).normalized;
+        rb = GetComponent<Rigidbody>();
+    }
 
-        // Dirección de movimiento
-        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.z);
+    private void Update()
+    {
+        // Movimiento
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+        Vector3 move = new Vector3(moveX, 0, moveZ);
+        transform.Translate(move * moveSpeed * Time.deltaTime, Space.World);
 
-        // Calcular la distancia de movimiento
-        float moveDistance = moveSpeed * Time.deltaTime;
-
-        // Verificar si el jugador puede moverse en la dirección deseada
-        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance);
-
-        if (!canMove)
+        // Saltar
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            // Intentar moverse solo en la dirección X
-            Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-            canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
-
-            if (canMove)
-            {
-                // Moverse solo en X
-                moveDir = moveDirX;
-            }
-            else
-            {
-                // Intentar moverse solo en la dirección Z
-                Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
-                canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance);
-
-                if (canMove)
-                {
-                    // Moverse solo en Z
-                    moveDir = moveDirZ;
-                }
-                else
-                {
-                    // No se puede mover en ninguna dirección
-                    moveDir = Vector3.zero;
-                }
-            }
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false;
         }
+    }
 
-        // Aplicar movimiento si es posible
-        if (canMove)
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Detecta si toca el suelo
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            transform.position += moveDir * moveDistance;
-        }
-
-        // Rotar hacia la dirección del movimiento
-        if (moveDir != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            isGrounded = true;
         }
     }
 }

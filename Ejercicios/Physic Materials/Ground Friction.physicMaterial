@@ -6,9 +6,9 @@ PhysicMaterial:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Friction
-  dynamicFriction: 0.01
-  staticFriction: 0.01
-  bounciness: 0
-  frictionCombine: 2
-  bounceCombine: 2
+  m_Name: Ground Friction
+  dynamicFriction: 0.4
+  staticFriction: 0.5
+  bounciness: 0.05
+  frictionCombine: 0
+  bounceCombine: 1
