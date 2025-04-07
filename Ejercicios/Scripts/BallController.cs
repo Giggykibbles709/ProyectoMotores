@@ -3,12 +3,11 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
     private Rigidbody rb;
-    public float clickForce = 5f;
+    public float kickForce = 5f;
     public float liftForce = 5f;
 
     private Vector3 startPosition;
-    public Transform player; // Referencia al jugador
-    public float interactionDistance = 3f;
+    public PlayerInputHandler[] players;
 
     void Start()
     {
@@ -18,21 +17,18 @@ public class BallController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        foreach (var player in players)
         {
-            // Click izquierdo - disparar balón SOLO si está cerca
-            if (Vector3.Distance(player.position, transform.position) <= interactionDistance)
+            if (player.IsNearBall(transform.position))
             {
-                Vector3 direction = (transform.position - Camera.main.transform.position).normalized;
-                rb.AddForce(direction * clickForce, ForceMode.Impulse);
-            }
-        }
-        // Click derecho - levantar balón
-        if (Input.GetMouseButtonDown(1)) // 1 = botón derecho
-        {
-            if (Vector3.Distance(player.position, transform.position) <= interactionDistance)
-            {
-                rb.AddForce(Vector3.up * liftForce, ForceMode.Impulse);
+                if (player.TryKick(out Vector3 direction))
+                {
+                    rb.AddForce(direction * kickForce, ForceMode.Impulse);
+                }
+                if (player.TryLift())
+                {
+                    rb.AddForce(Vector3.up * liftForce, ForceMode.Impulse);
+                }
             }
         }
     }
