@@ -15,6 +15,7 @@ public class PlayerInputHandler : MonoBehaviour
     private bool liftPressed;
 
     private PlayerInput playerInput;
+    public Camera playerCamera;
 
     void Awake()
     {
@@ -35,7 +36,23 @@ public class PlayerInputHandler : MonoBehaviour
 
     void Update()
     {
-        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+        if (playerCamera == null)
+        {
+            Debug.LogError("Player Camera is not assigned!");
+            return;
+        }
+
+        // Calcular el movimiento basado en la orientación de la cámara
+        Vector3 forward = playerCamera.transform.forward;
+        Vector3 right = playerCamera.transform.right;
+
+        forward.y = 0; // Ignorar inclinación vertical de la cámara
+        right.y = 0;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 move = (forward * moveInput.y + right * moveInput.x).normalized;
         rb.MovePosition(transform.position + move * moveSpeed * Time.deltaTime);
 
         if (jumpPressed)
@@ -49,7 +66,8 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (kickPressed)
         {
-            direction = (Camera.main.transform.forward + Vector3.up * 0.1f).normalized;
+            // Disparo basado en la orientación de la cámara del jugador
+            direction = (playerCamera.transform.forward + Vector3.up * 0.1f).normalized;
             kickPressed = false;
             return true;
         }
