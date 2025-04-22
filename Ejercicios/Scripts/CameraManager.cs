@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
-    public Camera camera1; // Jugador 1
-    public Camera camera2; // Jugador 2
+    public Camera camera1; // Cámara 1 perspectiva
+    public Camera camera2; // Cámara 2 perspectiva
     public Camera isometricCamera; // Cámara isométrica
     public Camera orthographicCamera; // Cámara ortográfica
 
@@ -75,6 +75,9 @@ public class CameraManager : MonoBehaviour
         ball.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;
         player1.GetComponent<Rigidbody>().constraints = constraints;
         player2.GetComponent<Rigidbody>().constraints = constraints;
+
+        player1.transform.position = new Vector3(0, 1.01f, -5);
+        player2.transform.position = new Vector3(0, 1.01f, 5);
     }
 
     private void SetCameraState(Camera cam, bool state)
