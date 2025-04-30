@@ -75,9 +75,9 @@ public class CameraManager : MonoBehaviour
         ball.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionX;
         player1.GetComponent<Rigidbody>().constraints = constraints;
         player2.GetComponent<Rigidbody>().constraints = constraints;
-
-        player1.transform.position = new Vector3(0, 1.01f, -5);
-        player2.transform.position = new Vector3(0, 1.01f, 5);
+        ball.transform.position = new Vector3(0, ball.transform.position.y, ball.transform.position.z);
+        player1.transform.position = new Vector3(0, player1.transform.position.y, player1.transform.position.z);
+        player2.transform.position = new Vector3(0, player2.transform.position.y, player2.transform.position.z);
     }
 
     private void SetCameraState(Camera cam, bool state)
