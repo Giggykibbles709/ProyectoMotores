@@ -16,7 +16,7 @@ public class CarController : MonoBehaviour
     [SerializeField] private WheelCollider frontLeftWheelCollider, frontRightWheelCollider;
     [SerializeField] private WheelCollider rearLeftWheelCollider, rearRightWheelCollider;
 
-    // Transformaciones de las ruedas (para sincronizar la posición visual)
+    // Transforms de las ruedas (para sincronizar la posición visual)
     [SerializeField] private Transform frontLeftWheelTransform, frontRightWheelTransform;
     [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
 
@@ -106,18 +106,15 @@ public class CarController : MonoBehaviour
             // Calcula si la rueda está derrapando
             bool isSkidding = Mathf.Abs(wheelHit.sidewaysSlip) > skidThreshold;
 
-            // Calcula si se está haciendo un burnout (acelerar + frenar)
-            bool isBurnout = isBreaking && verticalInput > 0 && Mathf.Abs(wheelHit.forwardSlip) > skidThreshold;
-
-            // Activa las partículas si hay derrape o burnout
-            if (isSkidding || isBurnout)
+            // Activa las partículas si hay derrape
+            if (isSkidding)
             {
                 if (!smoke.isPlaying)
                     smoke.Play();
             }
             else
             {
-                // Detiene las partículas si no hay derrape ni burnout
+                // Detiene las partículas si no hay derrape
                 if (smoke.isPlaying)
                     smoke.Stop();
             }
