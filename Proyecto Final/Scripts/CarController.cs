@@ -5,171 +5,122 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-    private Rigidbody playerRb;
-    public WheelColliders colliders;
-    public WheelMeshes wheelMeshes;
-    public WheelParticles wheelParticles;
-    public float gasInput;
-    public float brakeInput;
-    public float steeringInput;
-    public GameObject smokePrefab;
-    public float motorPower;
-    public float brakePower;
-    private float slipAngle;
-    private float speed;
-    public AnimationCurve steeringCurve;
+    private float horizontalInput, verticalInput;
+    private float currentSteerAngle, currentbreakForce;
+    private bool isBreaking;
 
-    private void Start()
+    // Configuraciones del coche
+    [SerializeField] private float motorForce, breakForce, maxSteerAngle, skidThreshold;
+
+    // Colliders de las ruedas
+    [SerializeField] private WheelCollider frontLeftWheelCollider, frontRightWheelCollider;
+    [SerializeField] private WheelCollider rearLeftWheelCollider, rearRightWheelCollider;
+
+    // Transformaciones de las ruedas (para sincronizar la posición visual)
+    [SerializeField] private Transform frontLeftWheelTransform, frontRightWheelTransform;
+    [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
+
+    // Sistemas de partículas para el humo
+    [SerializeField] private ParticleSystem frontLeftSmoke, frontRightSmoke;
+    [SerializeField] private ParticleSystem rearLeftSmoke, rearRightSmoke;
+
+    private void FixedUpdate()
     {
-        playerRb = gameObject.GetComponent<Rigidbody>();
-        InstantiateSmoke();
+        GetInput();
+        HandleMotor();
+        HandleSteering();
+        UpdateWheels();
+        HandleSmoke();
     }
 
-    void InstantiateSmoke()
+    private void GetInput()
     {
-        wheelParticles.frontRightWheel = Instantiate(smokePrefab, colliders.frontRightWheel.transform.position - Vector3.up * colliders.frontRightWheel.radius, Quaternion.identity, colliders.frontRightWheel.transform).GetComponent<ParticleSystem>();
-        wheelParticles.frontLeftWheel = Instantiate(smokePrefab, colliders.frontLeftWheel.transform.position - Vector3.up * colliders.frontLeftWheel.radius, Quaternion.identity, colliders.frontLeftWheel.transform).GetComponent<ParticleSystem>();
-        wheelParticles.rearRightWheel = Instantiate(smokePrefab, colliders.rearRightWheel.transform.position - Vector3.up * colliders.rearRightWheel.radius, Quaternion.identity, colliders.rearRightWheel.transform).GetComponent<ParticleSystem>();
-        wheelParticles.rearLeftWheel = Instantiate(smokePrefab, colliders.rearLeftWheel.transform.position - Vector3.up * colliders.rearLeftWheel.radius, Quaternion.identity, colliders.rearLeftWheel.transform).GetComponent<ParticleSystem>();
+        horizontalInput = Input.GetAxis("Horizontal");
+
+        verticalInput = Input.GetAxis("Vertical");
+
+        isBreaking = Input.GetKey(KeyCode.Space);
     }
 
-    private void Update()
+    private void HandleMotor()
     {
-        speed = playerRb.velocity.magnitude;
-        CheckInput();
-        ApplyMotor();
-        ApplySteering();
-        ApplyBrake();
-        CheckParticles();
-        ApplyWheelPosition();
+        // Aplica fuerza motriz a las ruedas delanteras
+        frontLeftWheelCollider.motorTorque = verticalInput * motorForce;
+        frontRightWheelCollider.motorTorque = verticalInput * motorForce;
+
+        // Determina la fuerza de frenado
+        currentbreakForce = isBreaking ? breakForce : 0f;
+        ApplyBreaking();
     }
 
-    void CheckInput()
+    private void ApplyBreaking()
     {
-        gasInput = Input.GetAxis("Vertical");
-        steeringInput = Input.GetAxis("Horizontal");
-        slipAngle = Vector3.Angle(transform.forward, playerRb.velocity-transform.forward);
-        if(slipAngle < 120f)
+        // Aplica la fuerza de frenado a todas las ruedas
+        frontRightWheelCollider.brakeTorque = currentbreakForce;
+        frontLeftWheelCollider.brakeTorque = currentbreakForce;
+        rearLeftWheelCollider.brakeTorque = currentbreakForce;
+        rearRightWheelCollider.brakeTorque = currentbreakForce;
+    }
+
+    private void HandleSteering()
+    {
+        // Calcula el ángulo de giro basado en el input horizontal
+        currentSteerAngle = maxSteerAngle * horizontalInput;
+        frontLeftWheelCollider.steerAngle = currentSteerAngle;
+        frontRightWheelCollider.steerAngle = currentSteerAngle;
+    }
+
+    private void UpdateWheels()
+    {
+        // Actualiza la posición y rotación visual de cada rueda
+        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
+        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
+        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
+        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
+    }
+
+    private void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
+    {
+        // Sincroniza la posición y rotación del objeto visual de la rueda con el collider
+        Vector3 pos;
+        Quaternion rot;
+        wheelCollider.GetWorldPose(out pos, out rot);
+        wheelTransform.rotation = rot;
+        wheelTransform.position = pos;
+    }
+
+    private void HandleSmoke()
+    {
+        // Activa/desactiva las partículas de humo para las ruedas
+        HandleWheelSmoke(frontLeftWheelCollider, frontLeftSmoke);
+        HandleWheelSmoke(frontRightWheelCollider, frontRightSmoke);
+        HandleWheelSmoke(rearLeftWheelCollider, rearLeftSmoke);
+        HandleWheelSmoke(rearRightWheelCollider, rearRightSmoke);
+    }
+
+    private void HandleWheelSmoke(WheelCollider wheelCollider, ParticleSystem smoke)
+    {
+        WheelHit wheelHit;
+        if (wheelCollider.GetGroundHit(out wheelHit))
         {
-            if(gasInput < 0)
+            // Calcula si la rueda está derrapando
+            bool isSkidding = Mathf.Abs(wheelHit.sidewaysSlip) > skidThreshold;
+
+            // Calcula si se está haciendo un burnout (acelerar + frenar)
+            bool isBurnout = isBreaking && verticalInput > 0 && Mathf.Abs(wheelHit.forwardSlip) > skidThreshold;
+
+            // Activa las partículas si hay derrape o burnout
+            if (isSkidding || isBurnout)
             {
-                brakeInput = Mathf.Abs(gasInput);
-                gasInput = 0;
+                if (!smoke.isPlaying)
+                    smoke.Play();
+            }
+            else
+            {
+                // Detiene las partículas si no hay derrape ni burnout
+                if (smoke.isPlaying)
+                    smoke.Stop();
             }
         }
-        else
-        {
-            brakeInput = 0;
-        }
     }
-
-    void ApplyBrake()
-    {
-        colliders.frontRightWheel.brakeTorque = brakeInput * brakePower * 0.7f;
-        colliders.frontLeftWheel.brakeTorque = brakeInput * brakePower * 0.7f;
-        colliders.rearRightWheel.brakeTorque = brakeInput * brakePower * 0.3f;
-        colliders.rearLeftWheel.brakeTorque = brakeInput * brakePower * 0.3f;
-    }
-
-    void ApplyMotor()
-    {
-        colliders.rearRightWheel.motorTorque = motorPower * gasInput;
-        colliders.rearLeftWheel.motorTorque = motorPower * gasInput;
-    }
-
-    void ApplySteering()
-    {
-        float steeringAngle = steeringInput * steeringCurve.Evaluate(speed);
-        steeringAngle += Vector3.SignedAngle(transform.forward, playerRb.velocity + transform.forward, Vector3.up);
-        steeringAngle = Mathf.Clamp(steeringAngle, -90f, 90f);
-        colliders.frontRightWheel.steerAngle = steeringAngle;
-        colliders.frontLeftWheel.steerAngle = steeringAngle;
-    }
-
-    void ApplyWheelPosition()
-    {
-        UpdateWheel(colliders.frontRightWheel, wheelMeshes.frontRightWheel);
-        UpdateWheel(colliders.frontLeftWheel, wheelMeshes.frontLeftWheel);
-        UpdateWheel(colliders.rearRightWheel, wheelMeshes.rearRightWheel);
-        UpdateWheel(colliders.rearLeftWheel, wheelMeshes.rearLeftWheel);
-    }
-
-    void CheckParticles()
-    {
-        WheelHit[] wheelHits = new WheelHit[4];
-        colliders.frontRightWheel.GetGroundHit(out wheelHits[0]);
-        colliders.frontLeftWheel.GetGroundHit(out wheelHits[1]);
-        colliders.rearRightWheel.GetGroundHit(out wheelHits[2]);
-        colliders.rearLeftWheel.GetGroundHit(out wheelHits[3]);
-
-        float slipAllowance = 0.5f;
-        if ((Mathf.Abs(wheelHits[0].sidewaysSlip) + Mathf.Abs(wheelHits[0].forwardSlip) > slipAllowance))
-        {
-            wheelParticles.frontRightWheel.Play();
-        }
-        else
-        {
-            wheelParticles.frontRightWheel.Stop();
-        }
-        if ((Mathf.Abs(wheelHits[1].sidewaysSlip) + Mathf.Abs(wheelHits[1].forwardSlip) > slipAllowance))
-        {
-            wheelParticles.frontLeftWheel.Play();
-        }
-        else
-        {
-            wheelParticles.frontLeftWheel.Stop();
-        }
-        if ((Mathf.Abs(wheelHits[2].sidewaysSlip) + Mathf.Abs(wheelHits[2].forwardSlip) > slipAllowance))
-        {
-            wheelParticles.rearRightWheel.Play();
-        }
-        else
-        {
-            wheelParticles.rearRightWheel.Stop();
-        }
-        if ((Mathf.Abs(wheelHits[3].sidewaysSlip) + Mathf.Abs(wheelHits[3].forwardSlip) > slipAllowance))
-        {
-            wheelParticles.rearLeftWheel.Play();
-        }
-        else
-        {
-            wheelParticles.rearLeftWheel.Stop();
-        }
-    }
-
-    void UpdateWheel(WheelCollider collider, MeshRenderer mesh)
-    {
-        Quaternion quat;
-        Vector3 position;
-        collider.GetWorldPose(out position, out quat);
-        mesh.transform.position = position;
-        mesh.transform.rotation = quat;
-    }
-}
-
-[System.Serializable]
-public class WheelColliders
-{
-    public WheelCollider frontRightWheel;
-    public WheelCollider frontLeftWheel;
-    public WheelCollider rearRightWheel;
-    public WheelCollider rearLeftWheel;
-}
-
-[System.Serializable]
-public class WheelMeshes
-{
-    public MeshRenderer frontRightWheel;
-    public MeshRenderer frontLeftWheel;
-    public MeshRenderer rearRightWheel;
-    public MeshRenderer rearLeftWheel;
-}
-
-[System.Serializable]
-public class WheelParticles
-{
-    public ParticleSystem frontRightWheel;
-    public ParticleSystem frontLeftWheel;
-    public ParticleSystem rearRightWheel;
-    public ParticleSystem rearLeftWheel;
 }
