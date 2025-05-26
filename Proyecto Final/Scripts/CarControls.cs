@@ -53,15 +53,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""LookAround"",
-                    ""type"": ""Value"",
-                    ""id"": ""b81b672f-04b0-45f9-a330-c39ee1cc8bb2"",
-                    ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -119,17 +110,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""action"": ""Brake"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3d5de8e1-7316-4680-993f-a1cc504b190d"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""LookAround"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -141,7 +121,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
         m_Driving_Steering = m_Driving.FindAction("Steering", throwIfNotFound: true);
         m_Driving_Accelerate = m_Driving.FindAction("Accelerate", throwIfNotFound: true);
         m_Driving_Brake = m_Driving.FindAction("Brake", throwIfNotFound: true);
-        m_Driving_LookAround = m_Driving.FindAction("LookAround", throwIfNotFound: true);
     }
 
     ~@CarControls()
@@ -211,7 +190,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Driving_Steering;
     private readonly InputAction m_Driving_Accelerate;
     private readonly InputAction m_Driving_Brake;
-    private readonly InputAction m_Driving_LookAround;
     public struct DrivingActions
     {
         private @CarControls m_Wrapper;
@@ -219,7 +197,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
         public InputAction @Steering => m_Wrapper.m_Driving_Steering;
         public InputAction @Accelerate => m_Wrapper.m_Driving_Accelerate;
         public InputAction @Brake => m_Wrapper.m_Driving_Brake;
-        public InputAction @LookAround => m_Wrapper.m_Driving_LookAround;
         public InputActionMap Get() { return m_Wrapper.m_Driving; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -238,9 +215,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
             @Brake.started += instance.OnBrake;
             @Brake.performed += instance.OnBrake;
             @Brake.canceled += instance.OnBrake;
-            @LookAround.started += instance.OnLookAround;
-            @LookAround.performed += instance.OnLookAround;
-            @LookAround.canceled += instance.OnLookAround;
         }
 
         private void UnregisterCallbacks(IDrivingActions instance)
@@ -254,9 +228,6 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
             @Brake.started -= instance.OnBrake;
             @Brake.performed -= instance.OnBrake;
             @Brake.canceled -= instance.OnBrake;
-            @LookAround.started -= instance.OnLookAround;
-            @LookAround.performed -= instance.OnLookAround;
-            @LookAround.canceled -= instance.OnLookAround;
         }
 
         public void RemoveCallbacks(IDrivingActions instance)
@@ -279,6 +250,5 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
         void OnSteering(InputAction.CallbackContext context);
         void OnAccelerate(InputAction.CallbackContext context);
         void OnBrake(InputAction.CallbackContext context);
-        void OnLookAround(InputAction.CallbackContext context);
     }
 }

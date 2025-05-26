@@ -31,15 +31,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "LookAround",
-                    "type": "Value",
-                    "id": "b81b672f-04b0-45f9-a330-c39ee1cc8bb2",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -95,17 +86,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Brake",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3d5de8e1-7316-4680-993f-a1cc504b190d",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "LookAround",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

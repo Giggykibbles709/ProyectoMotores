@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SimpleCarPhysics : MonoBehaviour
+public class CarController : MonoBehaviour
 {
     [SerializeField] private float accelerationForce = 20f;  // Fuerza de aceleración
     [SerializeField] private float maxSpeed = 50f;          // Velocidad máxima
