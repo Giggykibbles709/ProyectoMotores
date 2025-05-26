@@ -1,123 +1,47 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CarController : MonoBehaviour
+public class SimpleCarPhysics : MonoBehaviour
 {
-    private float horizontalInput, verticalInput;
-    private float currentSteerAngle, currentbreakForce;
-    private bool isBreaking;
+    [SerializeField] private float accelerationForce = 20f;  // Fuerza de aceleración
+    [SerializeField] private float maxSpeed = 50f;          // Velocidad máxima
+    [SerializeField] private float turnSpeed = 50f;         // Velocidad de giro
+    [SerializeField] private float drag = 0.99f;            // Simulación de resistencia al movimiento
 
-    // Configuraciones del coche
-    [SerializeField] private float motorForce, breakForce, maxSteerAngle, skidThreshold;
+    private Rigidbody rb;
 
-    // Colliders de las ruedas
-    [SerializeField] private WheelCollider frontLeftWheelCollider, frontRightWheelCollider;
-    [SerializeField] private WheelCollider rearLeftWheelCollider, rearRightWheelCollider;
-
-    // Transforms de las ruedas (para sincronizar la posición visual)
-    [SerializeField] private Transform frontLeftWheelTransform, frontRightWheelTransform;
-    [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
-
-    // Sistemas de partículas para el humo
-    [SerializeField] private ParticleSystem frontLeftSmoke, frontRightSmoke;
-    [SerializeField] private ParticleSystem rearLeftSmoke, rearRightSmoke;
+    private void Start()
+    {
+        // Obtener el Rigidbody del coche
+        rb = GetComponent<Rigidbody>();
+    }
 
     private void FixedUpdate()
     {
-        GetInput();
-        HandleMotor();
+        HandleMovement();
         HandleSteering();
-        UpdateWheels();
-        HandleSmoke();
     }
 
-    private void GetInput()
+    private void HandleMovement()
     {
-        horizontalInput = Input.GetAxis("Horizontal");
+        // Obtener el input vertical para avanzar o retroceder
+        float forwardInput = Input.GetAxis("Vertical");
 
-        verticalInput = Input.GetAxis("Vertical");
+        // Aplicar fuerza en la dirección del coche
+        if (rb.velocity.magnitude < maxSpeed)
+        {
+            rb.AddForce(transform.forward * forwardInput * accelerationForce, ForceMode.Acceleration);
+        }
 
-        isBreaking = Input.GetKey(KeyCode.Space);
-    }
-
-    private void HandleMotor()
-    {
-        // Aplica fuerza motriz a las ruedas delanteras
-        frontLeftWheelCollider.motorTorque = verticalInput * motorForce;
-        frontRightWheelCollider.motorTorque = verticalInput * motorForce;
-
-        // Determina la fuerza de frenado
-        currentbreakForce = isBreaking ? breakForce : 0f;
-        ApplyBreaking();
-    }
-
-    private void ApplyBreaking()
-    {
-        // Aplica la fuerza de frenado a todas las ruedas
-        frontRightWheelCollider.brakeTorque = currentbreakForce;
-        frontLeftWheelCollider.brakeTorque = currentbreakForce;
-        rearLeftWheelCollider.brakeTorque = currentbreakForce;
-        rearRightWheelCollider.brakeTorque = currentbreakForce;
+        // Simular resistencia al movimiento
+        rb.velocity *= drag;
     }
 
     private void HandleSteering()
     {
-        // Calcula el ángulo de giro basado en el input horizontal
-        currentSteerAngle = maxSteerAngle * horizontalInput;
-        frontLeftWheelCollider.steerAngle = currentSteerAngle;
-        frontRightWheelCollider.steerAngle = currentSteerAngle;
-    }
+        // Obtener el input horizontal para girar
+        float turnInput = Input.GetAxis("Horizontal");
 
-    private void UpdateWheels()
-    {
-        // Actualiza la posición y rotación visual de cada rueda
-        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
-        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
-        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
-        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
-    }
-
-    private void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
-    {
-        // Sincroniza la posición y rotación del objeto visual de la rueda con el collider
-        Vector3 pos;
-        Quaternion rot;
-        wheelCollider.GetWorldPose(out pos, out rot);
-        wheelTransform.rotation = rot;
-        wheelTransform.position = pos;
-    }
-
-    private void HandleSmoke()
-    {
-        // Activa/desactiva las partículas de humo para las ruedas
-        HandleWheelSmoke(frontLeftWheelCollider, frontLeftSmoke);
-        HandleWheelSmoke(frontRightWheelCollider, frontRightSmoke);
-        HandleWheelSmoke(rearLeftWheelCollider, rearLeftSmoke);
-        HandleWheelSmoke(rearRightWheelCollider, rearRightSmoke);
-    }
-
-    private void HandleWheelSmoke(WheelCollider wheelCollider, ParticleSystem smoke)
-    {
-        WheelHit wheelHit;
-        if (wheelCollider.GetGroundHit(out wheelHit))
-        {
-            // Calcula si la rueda está derrapando
-            bool isSkidding = Mathf.Abs(wheelHit.sidewaysSlip) > skidThreshold;
-
-            // Activa las partículas si hay derrape
-            if (isSkidding)
-            {
-                if (!smoke.isPlaying)
-                    smoke.Play();
-            }
-            else
-            {
-                // Detiene las partículas si no hay derrape
-                if (smoke.isPlaying)
-                    smoke.Stop();
-            }
-        }
+        // Aplicar rotación para girar el coche
+        transform.Rotate(0f, turnInput * turnSpeed * Time.fixedDeltaTime, 0f);
     }
 }
