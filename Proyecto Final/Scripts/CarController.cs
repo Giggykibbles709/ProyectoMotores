@@ -2,76 +2,78 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-    [SerializeField] private float accelerationForce = 20f;   // Fuerza de aceleración
-    [SerializeField] private float maxSpeed = 50f;           // Velocidad máxima
-    [SerializeField] private float turnSpeed = 50f;          // Velocidad de giro
-    [SerializeField] private float drag = 0.99f;             // Simulación de resistencia al movimiento
-    [SerializeField] private float decelerationFactor = 5f;  // Factor de desaceleración progresiva
+    private float horizontalInput, verticalInput;
+    private float currentSteerAngle, currentbreakForce;
+    private bool isBraking;
 
-    private Rigidbody rb;
+    // Settings
+    [SerializeField] private float motorForce, breakForce, maxSteerAngle;
 
-    private void Start()
-    {
-        // Obtener el Rigidbody del coche
-        rb = GetComponent<Rigidbody>();
-        rb.drag = 0f; // Desactivar drag físico predeterminado para usar nuestro propio sistema
-        rb.angularDrag = 0f;
-    }
+    // Wheel Colliders
+    [SerializeField] private WheelCollider frontLeftWheelCollider, frontRightWheelCollider;
+    [SerializeField] private WheelCollider rearLeftWheelCollider, rearRightWheelCollider;
+
+    // Wheels
+    [SerializeField] private Transform frontLeftWheelTransform, frontRightWheelTransform;
+    [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
 
     private void FixedUpdate()
     {
-        HandleMovement();
+        GetInput();
+        HandleMotor();
         HandleSteering();
-        ApplyDeceleration();
+        UpdateWheels();
     }
 
-    private void HandleMovement()
+    private void GetInput()
     {
-        // Obtener el input vertical para avanzar o retroceder
-        float forwardInput = Input.GetAxis("Vertical");
+        // Steering Input
+        horizontalInput = Input.GetAxis("Horizontal");
 
-        // Aplicar fuerza en la dirección del coche solo si hay input significativo
-        if (Mathf.Abs(forwardInput) > 0.1f)
-        {
-            Vector3 force = transform.forward * forwardInput * accelerationForce;
+        // Acceleration Input
+        verticalInput = Input.GetAxis("Vertical");
 
-            // Limitar la velocidad máxima antes de aplicar la fuerza
-            if (rb.velocity.magnitude < maxSpeed)
-            {
-                rb.AddForce(force, ForceMode.Acceleration);
-            }
-        }
+        // Breaking Input
+        isBraking = Input.GetKey(KeyCode.Space);
+    }
+
+    private void HandleMotor()
+    {
+        frontLeftWheelCollider.motorTorque = verticalInput * motorForce;
+        frontRightWheelCollider.motorTorque = verticalInput * motorForce;
+        currentbreakForce = isBraking ? breakForce : 0f;
+        ApplyBraking();
+    }
+
+    private void ApplyBraking()
+    {
+        frontRightWheelCollider.brakeTorque = currentbreakForce;
+        frontLeftWheelCollider.brakeTorque = currentbreakForce;
+        rearLeftWheelCollider.brakeTorque = currentbreakForce;
+        rearRightWheelCollider.brakeTorque = currentbreakForce;
     }
 
     private void HandleSteering()
     {
-        // Obtener el input horizontal para girar
-        float turnInput = Input.GetAxis("Horizontal");
-
-        // Solo permitir giro si el coche está en movimiento
-        if (rb.velocity.magnitude > 0.1f)
-        {
-            float turnAngle = turnInput * turnSpeed * Time.fixedDeltaTime;
-            transform.Rotate(0f, turnAngle, 0f);
-        }
+        currentSteerAngle = maxSteerAngle * horizontalInput;
+        frontLeftWheelCollider.steerAngle = currentSteerAngle;
+        frontRightWheelCollider.steerAngle = currentSteerAngle;
     }
 
-    private void ApplyDeceleration()
+    private void UpdateWheels()
     {
-        // Si no hay entrada de aceleración, desacelerar el coche gradualmente
-        if (Input.GetAxis("Vertical") == 0f)
-        {
-            Vector3 deceleration = rb.velocity * -decelerationFactor * Time.fixedDeltaTime;
-            rb.AddForce(deceleration, ForceMode.VelocityChange);
-        }
+        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
+        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
+        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
+        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
+    }
 
-        // Aplicar resistencia al movimiento (drag)
-        rb.velocity *= drag;
-
-        // Limitar la velocidad a cero si es muy baja para evitar movimientos no deseados
-        if (rb.velocity.magnitude < 0.1f)
-        {
-            rb.velocity = Vector3.zero;
-        }
+    private void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
+    {
+        Vector3 pos;
+        Quaternion rot;
+        wheelCollider.GetWorldPose(out pos, out rot);
+        wheelTransform.rotation = rot;
+        wheelTransform.position = pos;
     }
 }
