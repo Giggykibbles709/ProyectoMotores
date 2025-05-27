@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CarController : MonoBehaviour
+public class PlayerCarController : MonoBehaviour
 {
     private float horizontalInput, verticalInput;
     private float currentSteerAngle, currentbreakForce;

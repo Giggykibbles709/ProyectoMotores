@@ -11,10 +11,23 @@ public class RaceUIManager : MonoBehaviour
 
     private float currentLapTime = 0f;
     private float totalTime = 0f;
+    private bool raceStarted = false; // Indica si la carrera ha comenzado
+
+    private void Start()
+    {
+        // Escuchar un evento para cuando termine la cuenta atrás (puedes integrarlo según tu lógica existente)
+        RaceEventManager.OnCountdownFinished += StartRace;
+    }
+
+    private void OnDestroy()
+    {
+        // Desuscribirse para evitar errores si el objeto es destruido
+        RaceEventManager.OnCountdownFinished -= StartRace;
+    }
 
     private void Update()
     {
-        if (playerRacer == null) return;
+        if (!raceStarted || playerRacer == null) return;
 
         // Actualizar tiempos
         currentLapTime += Time.deltaTime;
@@ -33,6 +46,13 @@ public class RaceUIManager : MonoBehaviour
         }
     }
 
+    private void StartRace()
+    {
+        raceStarted = true; // Indica que la carrera ha comenzado
+        currentLapTime = 0f; // Reinicia el tiempo de vuelta
+        totalTime = 0f; // Reinicia el tiempo total
+    }
+
     private string FormatTime(float time)
     {
         int minutes = Mathf.FloorToInt(time / 60f);
@@ -40,5 +60,16 @@ public class RaceUIManager : MonoBehaviour
         int milliseconds = Mathf.FloorToInt((time * 1000f) % 1000f);
 
         return $"{minutes:00}:{seconds:00}:{milliseconds:000}";
+    }
+}
+
+// Clase auxiliar para manejar eventos de la carrera
+public static class RaceEventManager
+{
+    public static System.Action OnCountdownFinished;
+
+    public static void TriggerCountdownFinished()
+    {
+        OnCountdownFinished?.Invoke();
     }
 }

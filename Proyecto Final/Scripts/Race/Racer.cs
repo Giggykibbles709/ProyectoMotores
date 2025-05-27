@@ -7,8 +7,11 @@ public class Racer : MonoBehaviour
     public int lastCheckpointIndex = -1;
     public float distanceToNextCheckpoint = 0f;
     public int currentPosition = 0;
+    public int maxLaps = 3; // Número máximo de vueltas
+    public RaceMenuManager raceMenuManager; // Referencia al gestor del menú
 
     private bool[] visitedCheckpoints; // Rastrea los checkpoints visitados en esta vuelta
+    private bool raceFinished = false; // Indica si la carrera ha terminado
 
     private void Start()
     {
@@ -42,6 +45,8 @@ public class Racer : MonoBehaviour
 
     private void Update()
     {
+        if (raceFinished) return; // No actualizar si la carrera terminó
+
         if (checkpoints == null || checkpoints.Length == 0) return;
 
         Transform nextCheckpoint = checkpoints[(lastCheckpointIndex + 1) % checkpoints.Length];
@@ -56,6 +61,8 @@ public class Racer : MonoBehaviour
 
     public void CheckpointReached(int checkpointIndex)
     {
+        if (raceFinished) return;
+
         // Verifica si el checkpoint alcanzado es el siguiente en el orden
         if (lastCheckpointIndex == checkpointIndex - 1 ||
             (lastCheckpointIndex == checkpoints.Length - 1 && checkpointIndex == 0))
@@ -95,5 +102,22 @@ public class Racer : MonoBehaviour
     {
         currentLap++;
         Debug.Log($"Lap Completed! Current Lap: {currentLap}");
+
+        if (currentLap >= maxLaps)
+        {
+            FinishRace();
+        }
+    }
+
+    private void FinishRace()
+    {
+        raceFinished = true;
+        Debug.Log("Race Finished!");
+
+        // Mostrar menú de fin de carrera
+        if (raceMenuManager != null)
+        {
+            raceMenuManager.ShowFinishMenu(FindObjectsOfType<Racer>());
+        }
     }
 }
