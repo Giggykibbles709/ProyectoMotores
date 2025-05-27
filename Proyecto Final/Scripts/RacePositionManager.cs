@@ -1,21 +1,40 @@
+using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class RacePositionManager : MonoBehaviour
 {
-    public Racer[] racers; // Todos los corredores (incluyendo el jugador)
+    public List<Racer> racers = new List<Racer>();
 
     private void Update()
     {
-        if (racers == null || racers.Length == 0) return;
+        UpdatePositions();
+    }
 
-        // Ordenar corredores por progreso
-        racers = racers.OrderByDescending(r => r.GetProgress()).ToArray();
+    private void UpdatePositions()
+    {
+        // Ordena los corredores por progreso descendente
+        racers.Sort((a, b) => b.GetProgress().CompareTo(a.GetProgress()));
 
-        // Asignar posición a cada corredor
-        for (int i = 0; i < racers.Length; i++)
+        // Asigna las posiciones actualizadas a cada corredor
+        for (int i = 0; i < racers.Count; i++)
         {
             racers[i].currentPosition = i + 1;
+        }
+    }
+
+    public void RegisterRacer(Racer racer)
+    {
+        if (!racers.Contains(racer))
+        {
+            racers.Add(racer);
+        }
+    }
+
+    public void UnregisterRacer(Racer racer)
+    {
+        if (racers.Contains(racer))
+        {
+            racers.Remove(racer);
         }
     }
 }
