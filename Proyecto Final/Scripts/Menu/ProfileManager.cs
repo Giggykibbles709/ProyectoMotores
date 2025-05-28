@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,91 +9,51 @@ public class ProfileData
     public string playerName;
     public string avatar;
     public int countryIndex;
-    public int money = 0;
-    public int racesPlayed = 0;
-    public int racesWon = 0;
-    public int reputationLevel = 0;
+    public int money;
+    public int reputationLevel;
 
-    public List<int> ownedCars = new List<int>(); // Coches comprados
-    public List<bool> unlockedCircuits = new List<bool>(); // Circuitos desbloqueados
+    public List<int> ownedCars;
+    public List<bool> unlockedCircuits;
 }
 
 public class ProfileManager : MonoBehaviour
 {
-    public Button[] profileButtons;
-    public Button[] deleteButtons;
     public GameObject creationPanel;
     public GameObject mainMenuPanel;
-    public GameObject profilesPanel;
+
     public InputField nameInput;
     public Dropdown countryDropdown;
     public Image avatarImage;
     public Sprite[] avatars;
     public Sprite[] countryFlags;
 
-    public GameObject profileInfoPanel;
     public Text profileNameText;
     public Image profileCountryFlag;
     public Image profileAvatarImage;
     public Text profileMoneyText;
-    public Text profileRacesPlayedText;
-    public Text profileRacesWonText;
     public Text profileReputationText;
-
-    private int selectedProfileIndex = -1;
-    private const string ProfileKey = "Profile";
-
-    public ProfileData activeProfile;
-    public CarShopManager carShopManager;
 
     private void Start()
     {
-        // Verificar si hay un perfil seleccionado
-        if (PlayerPrefs.HasKey("SelectedProfileIndex"))
+        if (PlayerPrefs.HasKey("PlayerName"))
         {
-            int savedProfileIndex = PlayerPrefs.GetInt("SelectedProfileIndex");
-
-            // Cargar automáticamente el perfil si existe
-            if (PlayerPrefs.HasKey($"{ProfileKey}{savedProfileIndex}"))
-            {
-                activeProfile = JsonUtility.FromJson<ProfileData>(PlayerPrefs.GetString($"{ProfileKey}{savedProfileIndex}"));
-                selectedProfileIndex = savedProfileIndex;
-
-                // Cargar nombre y país desde PlayerPrefs
-                PlayerPrefs.SetString("PlayerName", activeProfile.playerName);
-                PlayerPrefs.SetInt("CountryIndex", activeProfile.countryIndex);
-                PlayerPrefs.SetInt("Money", activeProfile.money);
-                PlayerPrefs.SetInt("RacesPlayed", activeProfile.racesPlayed);
-                PlayerPrefs.SetInt("RacesWon", activeProfile.racesWon);
-                PlayerPrefs.SetInt("ReputationLevel", activeProfile.reputationLevel);
-                PlayerPrefs.Save();
-
-                // Mostrar el menú principal directamente
-                mainMenuPanel.SetActive(true);
-                profilesPanel.SetActive(false);
-
-                if (activeProfile != null)
-                {
-                    carShopManager.InitializeShop(activeProfile);
-                }
-                else
-                {
-                    Debug.LogError("Profile data is missing!");
-                }
-            }
-            else
-            {
-                // Si el índice guardado no es válido, muestra el panel de creación/selección
-                ConfigureDropdown();
-                LoadProfiles();
-            }
+            LoadProfile();
+            UpdateProfileDisplay();
+            mainMenuPanel.SetActive(true);
         }
         else
         {
-            // Si no hay perfil seleccionado, muestra el panel de creación/selección
+            OpenCreationPanel();
             ConfigureDropdown();
-            LoadProfiles();
         }
+    }
+
+    private void OpenCreationPanel()
+    {
+        creationPanel.SetActive(true);
+        nameInput.text = "";
+        countryDropdown.value = 0;
+        avatarImage.sprite = avatars[0];
     }
 
     private void ConfigureDropdown()
@@ -108,87 +69,84 @@ public class ProfileManager : MonoBehaviour
         countryDropdown.RefreshShownValue();
     }
 
-    private void LoadProfiles()
-    {
-        for (int i = 0; i < profileButtons.Length; i++)
-        {
-            int index = i;
-            string profileKey = $"{ProfileKey}{index}";
-
-            if (PlayerPrefs.HasKey(profileKey))
-            {
-                ProfileData profile = JsonUtility.FromJson<ProfileData>(PlayerPrefs.GetString(profileKey));
-                profileButtons[i].GetComponentInChildren<Text>().text = profile.playerName;
-                deleteButtons[i].gameObject.SetActive(true);
-            }
-            else
-            {
-                profileButtons[i].GetComponentInChildren<Text>().text = "Empty Profile";
-                deleteButtons[i].gameObject.SetActive(false);
-            }
-
-            profileButtons[i].onClick.AddListener(() => OnSelectProfile(index));
-            deleteButtons[i].onClick.AddListener(() => DeleteProfile(index));
-        }
-    }
-
-    public void OnSelectProfile(int index)
-    {
-        selectedProfileIndex = index;
-        string profileKey = $"{ProfileKey}{index}";
-
-        if (PlayerPrefs.HasKey(profileKey))
-        {
-            // Cargar el perfil seleccionado
-            activeProfile = JsonUtility.FromJson<ProfileData>(PlayerPrefs.GetString(profileKey));
-
-            // Guardar el índice del perfil seleccionado
-            PlayerPrefs.SetInt("SelectedProfileIndex", selectedProfileIndex);
-            PlayerPrefs.SetString("PlayerName", activeProfile.playerName);
-            PlayerPrefs.SetInt("CountryIndex", activeProfile.countryIndex);
-            PlayerPrefs.SetInt("Money", activeProfile.money);
-            PlayerPrefs.SetInt("RacesPlayed", activeProfile.racesPlayed);
-            PlayerPrefs.SetInt("RacesWon", activeProfile.racesWon);
-            PlayerPrefs.SetInt("ReputationLevel", activeProfile.reputationLevel);
-            PlayerPrefs.Save();
-
-            mainMenuPanel.SetActive(true);
-            profilesPanel.SetActive(false);
-
-            if (activeProfile != null)
-            {
-                carShopManager.InitializeShop(activeProfile);
-            }
-            else
-            {
-                Debug.LogError("Profile data is missing!");
-            }
-        }
-        else
-        {
-            // Abrir el panel de creación si no hay perfil
-            OpenCreationPanel();
-        }
-    }
-
     public void OnSelectAvatar(int avatarIndex)
     {
         avatarImage.sprite = avatars[avatarIndex];
     }
 
-    public void DisplayProfileInfo()
+    public void SaveProfile()
     {
-        if (activeProfile == null) return;
+        ProfileData profile = new ProfileData
+        {
+            playerName = nameInput.text,
+            avatar = avatarImage.sprite.name,
+            countryIndex = countryDropdown.value,
+            money = 0,
+            reputationLevel = 1,
+            ownedCars = new List<int> { 0 },
+            unlockedCircuits = new List<bool> { true, false, false, false, false }
+        };
 
-        mainMenuPanel.SetActive(false);
-        profileInfoPanel.SetActive(true);
-        profileNameText.text = activeProfile.playerName;
-        profileCountryFlag.sprite = countryFlags[activeProfile.countryIndex];
-        profileAvatarImage.sprite = GetAvatarSprite(activeProfile.avatar);
-        profileMoneyText.text = $"Money: ${activeProfile.money}";
-        profileRacesPlayedText.text = $"Races Played: {activeProfile.racesPlayed}";
-        profileRacesWonText.text = $"Races Won: {activeProfile.racesWon}";
-        profileReputationText.text = $"Reputation Level: {activeProfile.reputationLevel}";
+        SaveProfileToPrefs(profile);
+
+        creationPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+        UpdateProfileDisplay();
+    }
+
+    private void LoadProfile()
+    {
+        ProfileData profile = new ProfileData
+        {
+            playerName = PlayerPrefs.GetString("PlayerName"),
+            avatar = PlayerPrefs.GetString("Avatar"),
+            countryIndex = PlayerPrefs.GetInt("CountryIndex"),
+            money = PlayerPrefs.GetInt("Money"),
+            reputationLevel = PlayerPrefs.GetInt("ReputationLevel"),
+            ownedCars = LoadList("OwnedCars"),
+            unlockedCircuits = LoadBoolList("UnlockedCircuits")
+        };
+
+        UpdateProfileDisplay(profile);
+    }
+
+    public void UpdateProfileDisplay(ProfileData profile = null)
+    {
+        profile ??= LoadProfileFromPrefs();
+
+        profileNameText.text = profile.playerName;
+        profileCountryFlag.sprite = countryFlags[profile.countryIndex];
+        profileAvatarImage.sprite = GetAvatarSprite(profile.avatar);
+        profileMoneyText.text = $"Money: ${profile.money}";
+        profileReputationText.text = $"Reputation Level: {profile.reputationLevel}";
+    }
+
+    private void SaveProfileToPrefs(ProfileData profile)
+    {
+        PlayerPrefs.SetString("PlayerName", profile.playerName);
+        PlayerPrefs.SetString("Avatar", profile.avatar);
+        PlayerPrefs.SetInt("CountryIndex", profile.countryIndex);
+        PlayerPrefs.SetInt("Money", profile.money);
+        PlayerPrefs.SetInt("ReputationLevel", profile.reputationLevel);
+
+        SaveList("OwnedCars", profile.ownedCars);
+        SaveBoolList("UnlockedCircuits", profile.unlockedCircuits);
+
+        PlayerPrefs.Save();
+    }
+
+    private ProfileData LoadProfileFromPrefs()
+    {
+        return new ProfileData
+        {
+            playerName = PlayerPrefs.GetString("PlayerName"),
+            avatar = PlayerPrefs.GetString("Avatar"),
+            countryIndex = PlayerPrefs.GetInt("CountryIndex"),
+            money = PlayerPrefs.GetInt("Money"),
+            reputationLevel = PlayerPrefs.GetInt("ReputationLevel"),
+            ownedCars = LoadList("OwnedCars"),
+            unlockedCircuits = LoadBoolList("UnlockedCircuits")
+        };
     }
 
     private Sprite GetAvatarSprite(string avatarName)
@@ -198,80 +156,30 @@ public class ProfileManager : MonoBehaviour
             if (avatar.name == avatarName)
                 return avatar;
         }
-        return avatars[0]; // Retorna un avatar por defecto si no coincide
+        return avatars[0];
     }
 
-    private void OpenCreationPanel()
+    private void SaveList(string key, List<int> list)
     {
-        creationPanel.SetActive(true);
-        nameInput.text = "";
-        countryDropdown.value = 0;
-        avatarImage.sprite = avatars[0];
+        PlayerPrefs.SetString(key, string.Join(",", list));
     }
 
-    public void OnSaveProfile()
+    private List<int> LoadList(string key)
     {
-        if (selectedProfileIndex < 0) return;
-
-        ProfileData newProfile = new ProfileData
-        {
-            playerName = nameInput.text,
-            avatar = avatarImage.sprite.name,
-            countryIndex = countryDropdown.value
-        };
-
-        // Por defecto desbloquea solo el primer circuito
-        newProfile.unlockedCircuits.Add(true);
-        for (int i = 1; i < 5; i++) // Supongamos 5 circuitos
-        {
-            newProfile.unlockedCircuits.Add(false);
-        }
-
-        // Desbloquea el primer coche
-        if (!newProfile.ownedCars.Contains(0))
-        {
-            newProfile.ownedCars.Add(0); // El índice 0 representa el primer coche
-        }
-
-        string profileKey = $"{ProfileKey}{selectedProfileIndex}";
-        PlayerPrefs.SetString(profileKey, JsonUtility.ToJson(newProfile));
-        PlayerPrefs.SetString("PlayerName", newProfile.playerName);
-        PlayerPrefs.SetInt("CountryIndex", newProfile.countryIndex);
-        PlayerPrefs.SetInt("Money", newProfile.money);
-        PlayerPrefs.SetInt("RacesPlayed", newProfile.racesPlayed);
-        PlayerPrefs.SetInt("RacesWon", newProfile.racesWon);
-        PlayerPrefs.SetInt("ReputationLevel", newProfile.reputationLevel);
-        PlayerPrefs.Save();
-
-        profileButtons[selectedProfileIndex].GetComponentInChildren<Text>().text = newProfile.playerName;
-        deleteButtons[selectedProfileIndex].gameObject.SetActive(true);
-        creationPanel.SetActive(false);
+        string data = PlayerPrefs.GetString(key, "");
+        if (string.IsNullOrEmpty(data)) return new List<int>();
+        return new List<int>(Array.ConvertAll(data.Split(','), int.Parse));
     }
 
-    public void DeleteProfile(int index)
+    private void SaveBoolList(string key, List<bool> list)
     {
-        string profileKey = $"{ProfileKey}{index}";
-
-        if (PlayerPrefs.HasKey(profileKey))
-        {
-            PlayerPrefs.DeleteKey(profileKey);
-            PlayerPrefs.Save();
-
-            profileButtons[index].GetComponentInChildren<Text>().text = "Empty Profile";
-            deleteButtons[index].gameObject.SetActive(false);
-
-            if (selectedProfileIndex == index)
-            {
-                profileInfoPanel.SetActive(false);
-                selectedProfileIndex = -1;
-                activeProfile = null;
-            }
-        }
+        PlayerPrefs.SetString(key, string.Join(",", list.ConvertAll(b => b ? "1" : "0")));
     }
 
-    public void CloseProfileInfoPanel()
+    private List<bool> LoadBoolList(string key)
     {
-        profileInfoPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);
+        string data = PlayerPrefs.GetString(key, "");
+        if (string.IsNullOrEmpty(data)) return new List<bool>();
+        return new List<bool>(Array.ConvertAll(data.Split(','), s => s == "1"));
     }
 }

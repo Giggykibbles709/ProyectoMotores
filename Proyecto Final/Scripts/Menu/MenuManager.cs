@@ -16,6 +16,12 @@ public class MenuManager : MonoBehaviour
         
     }
 
+    public void ResetPlayerPrefs()
+    {
+        PlayerPrefs.DeleteAll();
+        Debug.Log("PlayerPrefs reset.");
+    }
+
     private void OnApplicationQuit()
     {
         PlayerPrefs.DeleteKey("SelectedProfileIndex");

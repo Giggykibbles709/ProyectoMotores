@@ -9,29 +9,57 @@ public class CarShopManager : MonoBehaviour
     public Button nextButton;
     public Button buyButton;
 
-    private int[] carPrices = { 0, 2000, 5000, 10000, 25000, 50000 };
+    private int[] carPrices = { 0, 2000, 5000, 10000, 25000 };
     private string[] carNames = { "Car 1", "Car 2", "Car 3", "Car 4", "Car 5" };
-    private bool[] carsUnlocked = new bool[0];
-    private ProfileData currentProfile;
+    private bool[] carsUnlocked;
+    private int playerMoney;
 
-    public void InitializeShop(ProfileData profile)
+    private void Start()
     {
-        currentProfile = profile;
-
-        // Inicializar `carsUnlocked` con el tamaño correcto
+        // Carga el dinero del jugador y los coches desbloqueados desde PlayerPrefs
+        playerMoney = PlayerPrefs.GetInt("Money", 0);
         carsUnlocked = new bool[carNames.Length];
+        LoadOwnedCars();
 
-        // Configura los coches desbloqueados basándose en el perfil activo
-        for (int i = 0; i < currentProfile.ownedCars.Count; i++)
+        // Inicializa la interfaz de la tienda
+        UpdateCarUI();
+    }
+
+    private void LoadOwnedCars()
+    {
+        // Cargar la lista de coches desbloqueados desde PlayerPrefs
+        string ownedCarsData = PlayerPrefs.GetString("OwnedCars", "0"); // Por defecto, solo el primer coche está desbloqueado
+        string[] ownedCarsIndices = ownedCarsData.Split(',');
+
+        foreach (string index in ownedCarsIndices)
         {
-            int ownedCarIndex = currentProfile.ownedCars[i];
-            if (ownedCarIndex >= 0 && ownedCarIndex < carsUnlocked.Length)
+            if (int.TryParse(index, out int carIndex) && carIndex >= 0 && carIndex < carsUnlocked.Length)
             {
-                carsUnlocked[ownedCarIndex] = true;
+                carsUnlocked[carIndex] = true;
             }
         }
-        
-        UpdateCarUI();
+    }
+
+    private void SaveOwnedCars()
+    {
+        // Guardar la lista de coches desbloqueados en PlayerPrefs
+        string ownedCarsData = "";
+        for (int i = 0; i < carsUnlocked.Length; i++)
+        {
+            if (carsUnlocked[i])
+            {
+                ownedCarsData += $"{i},";
+            }
+        }
+
+        if (ownedCarsData.EndsWith(","))
+        {
+            ownedCarsData = ownedCarsData.TrimEnd(',');
+        }
+
+        PlayerPrefs.SetString("OwnedCars", ownedCarsData);
+        PlayerPrefs.SetInt("Money", playerMoney);
+        PlayerPrefs.Save();
     }
 
     private void UpdateCarUI()
@@ -43,15 +71,16 @@ public class CarShopManager : MonoBehaviour
         }
 
         // Actualiza el texto del coche
-        carNameText.text = $"{carNames[currentCarIndex]} - Price: {carPrices[currentCarIndex]}$";
+        carNameText.text = carsUnlocked[currentCarIndex]
+            ? $"{carNames[currentCarIndex]} - Owned"
+            : $"{carNames[currentCarIndex]} - Price: {carPrices[currentCarIndex]}$";
 
-        // Configura botones de navegación
+        // Configura los botones de navegación
         previousButton.interactable = currentCarIndex > 0;
         nextButton.interactable = currentCarIndex < carNames.Length - 1;
 
         // Configura el botón de compra
-        bool isUnlocked = carsUnlocked[currentCarIndex];
-        buyButton.interactable = !isUnlocked && currentProfile.money >= carPrices[currentCarIndex];
+        buyButton.interactable = !carsUnlocked[currentCarIndex] && playerMoney >= carPrices[currentCarIndex];
         buyButton.gameObject.SetActive(carPrices[currentCarIndex] > 0);
     }
 
@@ -77,14 +106,20 @@ public class CarShopManager : MonoBehaviour
     {
         int carPrice = carPrices[currentCarIndex];
 
-        if (currentProfile.money >= carPrice && !carsUnlocked[currentCarIndex])
+        if (playerMoney >= carPrice && !carsUnlocked[currentCarIndex])
         {
-            currentProfile.money -= carPrice;
+            // Deduce el precio del coche del dinero del jugador
+            playerMoney -= carPrice;
+
+            // Desbloquea el coche
             carsUnlocked[currentCarIndex] = true;
-            currentProfile.ownedCars.Add(currentCarIndex);
+
+            // Guarda los cambios
+            SaveOwnedCars();
 
             Debug.Log($"{carNames[currentCarIndex]} bought successfully!");
 
+            // Actualiza la interfaz
             UpdateCarUI();
         }
         else
