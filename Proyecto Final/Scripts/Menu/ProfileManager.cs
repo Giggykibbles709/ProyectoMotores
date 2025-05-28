@@ -43,6 +43,7 @@ public class ProfileManager : MonoBehaviour
     private const string ProfileKey = "Profile";
 
     public ProfileData activeProfile;
+    public CarShopManager carShopManager;
 
     private void Start()
     {
@@ -63,11 +64,21 @@ public class ProfileManager : MonoBehaviour
                 PlayerPrefs.SetInt("Money", activeProfile.money);
                 PlayerPrefs.SetInt("RacesPlayed", activeProfile.racesPlayed);
                 PlayerPrefs.SetInt("RacesWon", activeProfile.racesWon);
+                PlayerPrefs.SetInt("ReputationLevel", activeProfile.reputationLevel);
                 PlayerPrefs.Save();
 
                 // Mostrar el menú principal directamente
                 mainMenuPanel.SetActive(true);
                 profilesPanel.SetActive(false);
+
+                if (activeProfile != null)
+                {
+                    carShopManager.InitializeShop(activeProfile);
+                }
+                else
+                {
+                    Debug.LogError("Profile data is missing!");
+                }
             }
             else
             {
@@ -135,10 +146,23 @@ public class ProfileManager : MonoBehaviour
             PlayerPrefs.SetInt("SelectedProfileIndex", selectedProfileIndex);
             PlayerPrefs.SetString("PlayerName", activeProfile.playerName);
             PlayerPrefs.SetInt("CountryIndex", activeProfile.countryIndex);
+            PlayerPrefs.SetInt("Money", activeProfile.money);
+            PlayerPrefs.SetInt("RacesPlayed", activeProfile.racesPlayed);
+            PlayerPrefs.SetInt("RacesWon", activeProfile.racesWon);
+            PlayerPrefs.SetInt("ReputationLevel", activeProfile.reputationLevel);
             PlayerPrefs.Save();
 
             mainMenuPanel.SetActive(true);
             profilesPanel.SetActive(false);
+
+            if (activeProfile != null)
+            {
+                carShopManager.InitializeShop(activeProfile);
+            }
+            else
+            {
+                Debug.LogError("Profile data is missing!");
+            }
         }
         else
         {
@@ -213,9 +237,10 @@ public class ProfileManager : MonoBehaviour
         PlayerPrefs.SetString(profileKey, JsonUtility.ToJson(newProfile));
         PlayerPrefs.SetString("PlayerName", newProfile.playerName);
         PlayerPrefs.SetInt("CountryIndex", newProfile.countryIndex);
-        PlayerPrefs.SetInt("Money", activeProfile.money);
-        PlayerPrefs.SetInt("RacesPlayed", activeProfile.racesPlayed);
-        PlayerPrefs.SetInt("RacesWon", activeProfile.racesWon);
+        PlayerPrefs.SetInt("Money", newProfile.money);
+        PlayerPrefs.SetInt("RacesPlayed", newProfile.racesPlayed);
+        PlayerPrefs.SetInt("RacesWon", newProfile.racesWon);
+        PlayerPrefs.SetInt("ReputationLevel", newProfile.reputationLevel);
         PlayerPrefs.Save();
 
         profileButtons[selectedProfileIndex].GetComponentInChildren<Text>().text = newProfile.playerName;
@@ -230,11 +255,6 @@ public class ProfileManager : MonoBehaviour
         if (PlayerPrefs.HasKey(profileKey))
         {
             PlayerPrefs.DeleteKey(profileKey);
-            PlayerPrefs.DeleteKey("PlayerName");
-            PlayerPrefs.DeleteKey("CountryIndex");
-            PlayerPrefs.DeleteKey("Money");
-            PlayerPrefs.DeleteKey("RacesPlayed");
-            PlayerPrefs.DeleteKey("RacesWon");
             PlayerPrefs.Save();
 
             profileButtons[index].GetComponentInChildren<Text>().text = "Empty Profile";

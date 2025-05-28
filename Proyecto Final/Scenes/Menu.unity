@@ -10888,6 +10888,7 @@ MonoBehaviour:
     reputationLevel: 0
     ownedCars: 
     unlockedCircuits: 
+  carShopManager: {fileID: 909221846}
 --- !u!4 &2078350259
 Transform:
   m_ObjectHideFlags: 0

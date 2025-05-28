@@ -11,7 +11,7 @@ public class CarShopManager : MonoBehaviour
 
     private int[] carPrices = { 0, 2000, 5000, 10000, 25000, 50000 };
     private string[] carNames = { "Car 1", "Car 2", "Car 3", "Car 4", "Car 5" };
-    private bool[] carsUnlocked;
+    private bool[] carsUnlocked = new bool[0];
     private ProfileData currentProfile;
 
     public void InitializeShop(ProfileData profile)
@@ -30,13 +30,18 @@ public class CarShopManager : MonoBehaviour
                 carsUnlocked[ownedCarIndex] = true;
             }
         }
-
-        UpdateCarUI();
+        
         UpdateCarUI();
     }
 
     private void UpdateCarUI()
     {
+        if (currentCarIndex < 0 || currentCarIndex >= carsUnlocked.Length)
+        {
+            Debug.LogError("currentCarIndex is out of range!");
+            return;
+        }
+
         // Actualiza el texto del coche
         carNameText.text = $"{carNames[currentCarIndex]} - Price: {carPrices[currentCarIndex]}$";
 
