@@ -21,6 +21,12 @@ public class AICarController : MonoBehaviour
     public float slowDownFactor = 0.5f;
     public float overtakingAggressiveness = 0.5f;
 
+    [Header("Wheel Transforms")]
+    public Transform frontLeftWheelTransform;
+    public Transform frontRightWheelTransform;
+    public Transform rearLeftWheelTransform;
+    public Transform rearRightWheelTransform;
+
     private int currentWaypointIndex = 0;
 
     void Start()
@@ -41,6 +47,9 @@ public class AICarController : MonoBehaviour
 
         // Seguir la ruta de waypoints.
         FollowWaypoints();
+
+        // Actualizar las ruedas visualmente.
+        UpdateWheels();
     }
 
     private void FollowWaypoints()
@@ -122,5 +131,20 @@ public class AICarController : MonoBehaviour
         Debug.DrawRay(transform.position, -transform.right * overtakingRange, Color.green);
     }
 
+    private void UpdateWheels()
+    {
+        // Rotar las ruedas en el eje X para simular el avance
+        float rotationAmount = currentSpeed * Time.deltaTime;
+        frontLeftWheelTransform.Rotate(Vector3.right, rotationAmount);
+        frontRightWheelTransform.Rotate(Vector3.right, rotationAmount);
+        rearLeftWheelTransform.Rotate(Vector3.right, rotationAmount);
+        rearRightWheelTransform.Rotate(Vector3.right, rotationAmount);
 
+        // Ajustar la dirección de las ruedas delanteras en el eje Y para simular el giro
+        float maxSteerAngle = 30f; // Ángulo máximo de dirección
+        Vector3 localEulerAngles = frontLeftWheelTransform.localEulerAngles;
+
+        frontLeftWheelTransform.localEulerAngles = new Vector3(localEulerAngles.x, Mathf.Sin(Time.time * turnSpeed) * maxSteerAngle, localEulerAngles.z);
+        frontRightWheelTransform.localEulerAngles = frontLeftWheelTransform.localEulerAngles;
+    }
 }

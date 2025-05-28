@@ -2,78 +2,70 @@ using UnityEngine;
 
 public class PlayerCarController : MonoBehaviour
 {
-    private float horizontalInput, verticalInput;
-    private float currentSteerAngle, currentbreakForce;
-    private bool isBraking;
+    [SerializeField] private float accelerationForce = 20f;  // Fuerza de aceleración
+    [SerializeField] private float maxSpeed = 50f;          // Velocidad máxima
+    [SerializeField] private float turnSpeed = 50f;         // Velocidad de giro
+    [SerializeField] private float drag = 0.99f;            // Simulación de resistencia al movimiento
 
-    // Settings
-    [SerializeField] private float motorForce, breakForce, maxSteerAngle;
+    [SerializeField] private Transform frontLeftWheelTransform;
+    [SerializeField] private Transform frontRightWheelTransform;
+    [SerializeField] private Transform rearLeftWheelTransform;
+    [SerializeField] private Transform rearRightWheelTransform;
 
-    // Wheel Colliders
-    [SerializeField] private WheelCollider frontLeftWheelCollider, frontRightWheelCollider;
-    [SerializeField] private WheelCollider rearLeftWheelCollider, rearRightWheelCollider;
+    private Rigidbody rb;
 
-    // Wheels
-    [SerializeField] private Transform frontLeftWheelTransform, frontRightWheelTransform;
-    [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
+    private void Start()
+    {
+        // Obtener el Rigidbody del coche
+        rb = GetComponent<Rigidbody>();
+    }
 
     private void FixedUpdate()
     {
-        GetInput();
-        HandleMotor();
+        HandleMovement();
         HandleSteering();
         UpdateWheels();
     }
 
-    private void GetInput()
+    private void HandleMovement()
     {
-        // Steering Input
-        horizontalInput = Input.GetAxis("Horizontal");
+        // Obtener el input vertical para avanzar o retroceder
+        float forwardInput = Input.GetAxis("Vertical");
 
-        // Acceleration Input
-        verticalInput = Input.GetAxis("Vertical");
+        // Aplicar fuerza en la dirección del coche
+        if (rb.velocity.magnitude < maxSpeed)
+        {
+            rb.AddForce(transform.forward * forwardInput * accelerationForce, ForceMode.Acceleration);
+        }
 
-        // Breaking Input
-        isBraking = Input.GetKey(KeyCode.Space);
-    }
-
-    private void HandleMotor()
-    {
-        frontLeftWheelCollider.motorTorque = verticalInput * motorForce;
-        frontRightWheelCollider.motorTorque = verticalInput * motorForce;
-        currentbreakForce = isBraking ? breakForce : 0f;
-        ApplyBraking();
-    }
-
-    private void ApplyBraking()
-    {
-        frontRightWheelCollider.brakeTorque = currentbreakForce;
-        frontLeftWheelCollider.brakeTorque = currentbreakForce;
-        rearLeftWheelCollider.brakeTorque = currentbreakForce;
-        rearRightWheelCollider.brakeTorque = currentbreakForce;
+        // Simular resistencia al movimiento
+        rb.velocity *= drag;
     }
 
     private void HandleSteering()
     {
-        currentSteerAngle = maxSteerAngle * horizontalInput;
-        frontLeftWheelCollider.steerAngle = currentSteerAngle;
-        frontRightWheelCollider.steerAngle = currentSteerAngle;
+        // Obtener el input horizontal para girar
+        float turnInput = Input.GetAxis("Horizontal");
+
+        // Aplicar rotación para girar el coche
+        transform.Rotate(0f, turnInput * turnSpeed * Time.fixedDeltaTime, 0f);
     }
 
     private void UpdateWheels()
     {
-        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
-        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
-        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
-        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
-    }
+        // Rotar las ruedas en el eje X para simular el avance
+        float rotationAmount = rb.velocity.magnitude * Time.fixedDeltaTime * Mathf.Sign(Vector3.Dot(rb.velocity, transform.forward));
+        frontLeftWheelTransform.Rotate(Vector3.right, rotationAmount);
+        frontRightWheelTransform.Rotate(Vector3.right, rotationAmount);
+        rearLeftWheelTransform.Rotate(Vector3.right, rotationAmount);
+        rearRightWheelTransform.Rotate(Vector3.right, rotationAmount);
 
-    private void UpdateSingleWheel(WheelCollider wheelCollider, Transform wheelTransform)
-    {
-        Vector3 pos;
-        Quaternion rot;
-        wheelCollider.GetWorldPose(out pos, out rot);
-        wheelTransform.rotation = rot;
-        wheelTransform.position = pos;
+        // Ajustar la dirección de las ruedas delanteras en el eje Y para simular el giro
+        float turnInput = Input.GetAxis("Horizontal");
+        float maxSteerAngle = 30f; // Ángulo máximo de dirección
+        Quaternion steerRotation = Quaternion.Euler(0f, turnInput * maxSteerAngle, 0f);
+
+        frontLeftWheelTransform.localRotation = steerRotation;
+        frontRightWheelTransform.localRotation = steerRotation;
     }
 }

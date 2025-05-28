@@ -9,12 +9,22 @@ public class RaceUIManager : MonoBehaviour
     public Text currentLapTimeText;
     public Text totalTimeText;
 
-    private float currentLapTime = 0f;
     private float totalTime = 0f;
     private bool raceStarted = false; // Indica si la carrera ha comenzado
 
     private void Start()
     {
+        // Asignar automáticamente el corredor del jugador al inicio
+        if (playerRacer == null)
+        {
+            playerRacer = FindObjectOfType<Racer>(); // Busca el objeto del jugador automáticamente
+            if (playerRacer == null)
+            {
+                Debug.LogError("No se encontró un objeto Racer en la escena para el jugador.");
+                return;
+            }
+        }
+
         // Escuchar un evento para cuando termine la cuenta atrás (puedes integrarlo según tu lógica existente)
         RaceEventManager.OnCountdownFinished += StartRace;
     }
@@ -30,26 +40,18 @@ public class RaceUIManager : MonoBehaviour
         if (!raceStarted || playerRacer == null) return;
 
         // Actualizar tiempos
-        currentLapTime += Time.deltaTime;
         totalTime += Time.deltaTime;
 
         // Actualizar textos
-        lapCounterText.text = $"Lap: {playerRacer.currentLap + 1}/3";
+        lapCounterText.text = $"Lap: {playerRacer.currentLap + 1}/{playerRacer.maxLaps}";
         positionText.text = $"Position: {playerRacer.currentPosition}/{FindObjectsOfType<Racer>().Length}";
-        currentLapTimeText.text = $"Lap Time: {FormatTime(currentLapTime)}";
+        currentLapTimeText.text = $"Lap Time: {FormatTime(playerRacer.CurrentLapTime)}";
         totalTimeText.text = $"Total Time: {FormatTime(totalTime)}";
-
-        // Reset lap time al completar una vuelta
-        if (playerRacer.lastCheckpointIndex == 0)
-        {
-            currentLapTime = 0f;
-        }
     }
 
     private void StartRace()
     {
         raceStarted = true; // Indica que la carrera ha comenzado
-        currentLapTime = 0f; // Reinicia el tiempo de vuelta
         totalTime = 0f; // Reinicia el tiempo total
     }
 

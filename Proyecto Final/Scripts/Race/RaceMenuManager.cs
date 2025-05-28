@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class RaceMenuManager : MonoBehaviour
@@ -25,15 +26,39 @@ public class RaceMenuManager : MonoBehaviour
     void Start()
     {
         Time.timeScale = 0f; // Pausa el juego al inicio
-        playerController = playerCar.GetComponent<PlayerCarController>();
-        aiControllers = new AICarController[aiCars.Length];
 
-        // Deshabilitar control de coches al inicio
-        DisableCarControl(playerCar);
+        // Asignación automática de playerCar buscando por tag
+        if (playerCar == null)
+        {
+            playerCar = GameObject.FindWithTag("Player");
+            if (playerCar == null)
+            {
+                Debug.LogError("No se encontró un coche del jugador en la escena con el tag 'Player'.");
+            }
+        }
+
+        // Asignación del controlador del jugador
+        if (playerCar != null)
+        {
+            playerController = playerCar.GetComponent<PlayerCarController>();
+            if (playerController == null)
+            {
+                Debug.LogError("El objeto playerCar no tiene un componente PlayerCarController.");
+            }
+        }
+
+        // Inicializa los controladores de IA
+        aiControllers = new AICarController[aiCars.Length];
         for (int i = 0; i < aiCars.Length; i++)
         {
             aiControllers[i] = aiCars[i].GetComponent<AICarController>();
-            DisableCarControl(aiCars[i]);
+        }
+
+        // Deshabilitar control de coches al inicio
+        DisableCarControl(playerCar);
+        foreach (var aiCar in aiCars)
+        {
+            DisableCarControl(aiCar);
         }
     }
 
@@ -108,7 +133,7 @@ public class RaceMenuManager : MonoBehaviour
         System.Array.Sort(racers, (a, b) => b.GetProgress().CompareTo(a.GetProgress()));
 
         // Construir el texto de posiciones
-        string standings = "Race Results:\n";
+        string standings = "";
         for (int i = 0; i < racers.Length; i++)
         {
             standings += $"{i + 1}. {racers[i].name}\n";
@@ -119,5 +144,10 @@ public class RaceMenuManager : MonoBehaviour
 
         // Activar el menú de fin de carrera
         finishMenuPanel.SetActive(true);
+    }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }

@@ -23,6 +23,7 @@ public class ProfileManager : MonoBehaviour
     public Button[] deleteButtons;
     public GameObject creationPanel;
     public GameObject mainMenuPanel;
+    public GameObject profilesPanel;
     public InputField nameInput;
     public Dropdown countryDropdown;
     public Image avatarImage;
@@ -45,8 +46,34 @@ public class ProfileManager : MonoBehaviour
 
     private void Start()
     {
-        ConfigureDropdown();
-        LoadProfiles();
+        // Verificar si hay un perfil seleccionado
+        if (PlayerPrefs.HasKey("SelectedProfileIndex"))
+        {
+            int savedProfileIndex = PlayerPrefs.GetInt("SelectedProfileIndex");
+
+            // Cargar automáticamente el perfil si existe
+            if (PlayerPrefs.HasKey($"{ProfileKey}{savedProfileIndex}"))
+            {
+                activeProfile = JsonUtility.FromJson<ProfileData>(PlayerPrefs.GetString($"{ProfileKey}{savedProfileIndex}"));
+                selectedProfileIndex = savedProfileIndex;
+
+                // Mostrar el menú principal directamente
+                mainMenuPanel.SetActive(true);
+                profilesPanel.SetActive(false);
+            }
+            else
+            {
+                // Si el índice guardado no es válido, muestra el panel de creación/selección
+                ConfigureDropdown();
+                LoadProfiles();
+            }
+        }
+        else
+        {
+            // Si no hay perfil seleccionado, muestra el panel de creación/selección
+            ConfigureDropdown();
+            LoadProfiles();
+        }
     }
 
     private void ConfigureDropdown()
@@ -95,7 +122,13 @@ public class ProfileManager : MonoBehaviour
         {
             // Cargar el perfil seleccionado
             activeProfile = JsonUtility.FromJson<ProfileData>(PlayerPrefs.GetString(profileKey));
+
+            // Guardar el índice del perfil seleccionado
+            PlayerPrefs.SetInt("SelectedProfileIndex", selectedProfileIndex);
+            PlayerPrefs.Save();
+
             mainMenuPanel.SetActive(true);
+            profilesPanel.SetActive(false);
         }
         else
         {
