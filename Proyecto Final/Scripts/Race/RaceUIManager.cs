@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class RaceUIManager : MonoBehaviour
 {
     public Racer playerRacer; // Referencia al corredor del jugador
+    public RaceMenuManager raceMenuManager; // Referencia al gestor del menú de la carrera
     public Text lapCounterText;
     public Text positionText;
     public Text currentLapTimeText;
@@ -47,6 +48,16 @@ public class RaceUIManager : MonoBehaviour
         positionText.text = $"Position: {playerRacer.currentPosition}/{FindObjectsOfType<Racer>().Length}";
         currentLapTimeText.text = $"Lap Time: {FormatTime(playerRacer.CurrentLapTime)}";
         totalTimeText.text = $"Total Time: {FormatTime(totalTime)}";
+
+        if(playerRacer.currentLap + 1 > playerRacer.maxLaps)
+        {
+            // Marca la carrera como finalizada para todos los corredores
+            foreach (var racer in FindObjectsOfType<Racer>())
+            {
+                racer.raceFinished = true;
+            }
+            raceMenuManager.ShowFinishMenu(FindObjectsOfType<Racer>()); // Muestra el menú de finalización de la carrera si se ha completado el número máximo de vueltas
+        }
     }
 
     private void StartRace()

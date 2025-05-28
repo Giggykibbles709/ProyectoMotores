@@ -18,6 +18,7 @@ public class PlayerCarController : MonoBehaviour
     {
         // Obtener el Rigidbody del coche
         rb = GetComponent<Rigidbody>();
+        rb.centerOfMass = new Vector3(0, -0.5f, 0); // Baja el centro de masa para mayor estabilidad
     }
 
     private void FixedUpdate()

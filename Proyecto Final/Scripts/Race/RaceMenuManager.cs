@@ -14,7 +14,12 @@ public class RaceMenuManager : MonoBehaviour
     public GameObject startPanel;
     public Text countdownText; // Texto para mostrar la cuenta regresiva
     public GameObject finishMenuPanel; // Panel de fin de carrera
-    public Text standingsText; // Texto para mostrar las posiciones
+    public Sprite[] countryFlags; // Sprites de banderas de países
+    public Image profileCountryFlag;
+    public Text profileNameText;
+    public Image[] standingsFlags;
+    public Text[] standingsNames;
+    public Text rewardText; // Texto para mostrar la recompensa al finalizar la carrera
 
     [Header("Cars")]
     public GameObject playerCar; // Referencia al coche del jugador
@@ -26,6 +31,9 @@ public class RaceMenuManager : MonoBehaviour
     void Start()
     {
         Time.timeScale = 0f; // Pausa el juego al inicio
+
+        profileCountryFlag.sprite = PlayerPrefs.GetInt("CountryIndex", 0) < countryFlags.Length ? countryFlags[PlayerPrefs.GetInt("CountryIndex", 0)] : null;
+        profileNameText.text = "4. " + PlayerPrefs.GetString("PlayerName", "Player");
 
         // Asignación automática de playerCar buscando por tag
         if (playerCar == null)
@@ -123,27 +131,97 @@ public class RaceMenuManager : MonoBehaviour
 
     public void ShowFinishMenu(Racer[] racers)
     {
+        DisableCarControl(playerCar);
+        foreach (var aiCar in aiCars)
+        {
+            DisableCarControl(aiCar);
+        }
+
         sceneCamera.SetActive(true); // Activa la cámara de la escena
         playerCamera.SetActive(false); // Desactiva la cámara del jugador
         playerHUD.SetActive(false); // Desactiva el HUD del jugador
 
-        if (finishMenuPanel == null || standingsText == null) return;
+        if (finishMenuPanel == null) return;
 
         // Ordenar los corredores por progreso
         System.Array.Sort(racers, (a, b) => b.GetProgress().CompareTo(a.GetProgress()));
 
-        // Construir el texto de posiciones
-        string standings = "";
+        // Mostrar resultados en la UI
         for (int i = 0; i < racers.Length; i++)
         {
-            standings += $"{i + 1}. {racers[i].name}\n";
-        }
+            if (i < standingsFlags.Length && i < standingsNames.Length)
+            {
+                if (racers[i].isPlayer) // Identificar si es el jugador
+                {
+                    // Asignar el nombre y la bandera desde PlayerPrefs
+                    standingsNames[i].text = $"{i + 1}. {PlayerPrefs.GetString("PlayerName", "Player")}";
+                    int countryIndex = PlayerPrefs.GetInt("CountryIndex", 0);
+                    standingsFlags[i].sprite = (countryIndex >= 0 && countryIndex < countryFlags.Length) ? countryFlags[countryIndex] : null;
+                    int racePlayed = PlayerPrefs.GetInt("RacesPlayed", 0);
+                    racePlayed += 1;
+                    PlayerPrefs.SetInt("RacesPlayed", racePlayed);
 
-        // Mostrar resultados en la UI
-        standingsText.text = standings;
+                    // Si el jugador está en el primer lugar, incrementar las carreras ganadas
+                    if (i == 0) // Primer lugar
+                    {
+                        int racesWon = PlayerPrefs.GetInt("RacesWon", 0);
+                        PlayerPrefs.SetInt("RacesWon", racesWon + 1);
+                    }
+                }
+                else
+                {
+                    // Asignar el nombre y la bandera desde el script Racer
+                    standingsNames[i].text = $"{i + 1}. {racers[i].racerName}";
+                    standingsFlags[i].sprite = (racers[i].countryIndex >= 0 && racers[i].countryIndex < countryFlags.Length) ? countryFlags[racers[i].countryIndex] : null;
+                }
+            }
+        }
 
         // Activar el menú de fin de carrera
         finishMenuPanel.SetActive(true);
+
+        // Guardar los cambios en PlayerPrefs
+        PlayerPrefs.Save();
+    }
+
+    public void ShowReward(int position)
+    {
+        // Calcular la recompensa basada en la posición
+        int reward = 0;
+        switch (position)
+        {
+            case 1:
+                reward = 1000; // Primer lugar
+                break;
+            case 2:
+                reward = 500; // Segundo lugar
+                break;
+            case 3:
+                reward = 250; // Tercer lugar
+                break;
+            default:
+                reward = 100; // Otros lugares
+                break;
+        }
+
+        // Obtener el dinero actual de PlayerPrefs
+        int currentMoney = PlayerPrefs.GetInt("Money", 0);
+
+        // Sumar la recompensa al dinero actual
+        currentMoney += reward;
+
+        // Guardar el nuevo total en PlayerPrefs
+        PlayerPrefs.SetInt("Money", currentMoney);
+
+        // Mostrar la recompensa en el texto
+        rewardText.text = $"You won ${reward} for this race";
+
+        PlayerPrefs.Save();
+    }
+
+    public void RestartRace()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Recargar la escena actual
     }
 
     public void BackToMenu()

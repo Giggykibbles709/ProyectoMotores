@@ -72,7 +72,7 @@ public class SelectionManager : MonoBehaviour
 
     private void LoadCircuitScene(int circuitIndex)
     {
-        string circuitSceneName = "Circuit" + (circuitIndex + 1); // Asumiendo nombres como "Circuit1", "Circuit2", etc.
+        string circuitSceneName = "Circuit" + (circuitIndex + 1);
         SceneManager.LoadScene(circuitSceneName);
     }
 }

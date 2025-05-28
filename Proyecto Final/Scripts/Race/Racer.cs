@@ -10,8 +10,12 @@ public class Racer : MonoBehaviour
     public int maxLaps = 3; // Número máximo de vueltas
     public RaceMenuManager raceMenuManager; // Referencia al gestor del menú
 
+    public bool isPlayer;
+    public string racerName;
+    public int countryIndex;
+
     private bool[] visitedCheckpoints; // Rastrea los checkpoints visitados en esta vuelta
-    private bool raceFinished = false; // Indica si la carrera ha terminado
+    public bool raceFinished = false; // Indica si la carrera ha terminado
     private bool raceStarted = false; // Indica si la carrera ha comenzado
     public float CurrentLapTime { get; private set; } = 0f; // Tiempo de la vuelta actual
 
@@ -140,22 +144,6 @@ public class Racer : MonoBehaviour
 
         // Reinicia el tiempo de la vuelta
         CurrentLapTime = 0f;
-
-        if (currentLap >= maxLaps)
-        {
-            FinishRace();
-        }
-    }
-
-    private void FinishRace()
-    {
-        raceFinished = true;
-
-        // Mostrar menú de fin de carrera
-        if (raceMenuManager != null)
-        {
-            raceMenuManager.ShowFinishMenu(FindObjectsOfType<Racer>());
-        }
     }
 
     private void StartRace()

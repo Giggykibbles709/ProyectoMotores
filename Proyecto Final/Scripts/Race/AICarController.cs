@@ -81,8 +81,6 @@ public class AICarController : MonoBehaviour
         {
             if (hit.collider.CompareTag("AICar") || hit.collider.CompareTag("Player"))
             {
-                Debug.Log("Obstáculo detectado: " + hit.collider.name);
-
                 // Intentar adelantar hacia un lado.
                 Vector3 overtakingDirection = Vector3.zero;
 

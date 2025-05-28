@@ -516,9 +516,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4183f88d466df9243b4c28290789909e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  accelerationForce: 20
-  maxSpeed: 50
-  turnSpeed: 50
+  accelerationForce: 30
+  maxSpeed: 80
+  turnSpeed: 80
   drag: 0.99
   frontLeftWheelTransform: {fileID: 4977596187959407405}
   frontRightWheelTransform: {fileID: 2278923944466291415}
@@ -550,6 +550,10 @@ MonoBehaviour:
   currentPosition: 0
   maxLaps: 3
   raceMenuManager: {fileID: 0}
+  isPlayer: 1
+  racerName: 
+  countryIndex: 0
+  raceFinished: 0
 --- !u!1 &6615714679994644915
 GameObject:
   m_ObjectHideFlags: 0
