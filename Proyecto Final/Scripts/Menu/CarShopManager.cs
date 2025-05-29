@@ -9,6 +9,9 @@ public class CarShopManager : MonoBehaviour
     public Button nextButton;
     public Button buyButton;
 
+    public Sprite[] carImages;
+    public Image carImageDisplay;
+
     private int[] carPrices = { 0, 2000, 5000, 10000, 25000 };
     private string[] carNames = { "Car 1", "Car 2", "Car 3", "Car 4", "Car 5" };
     private bool[] carsUnlocked;
@@ -82,6 +85,20 @@ public class CarShopManager : MonoBehaviour
         // Configura el botón de compra
         buyButton.interactable = !carsUnlocked[currentCarIndex] && playerMoney >= carPrices[currentCarIndex];
         buyButton.gameObject.SetActive(carPrices[currentCarIndex] > 0);
+
+        // Actualiza la imagen del coche
+        if (carImages != null && carImageDisplay != null)
+        {
+            if (currentCarIndex >= 0 && currentCarIndex < carImages.Length)
+            {
+                carImageDisplay.sprite = carImages[currentCarIndex];
+                carImageDisplay.SetNativeSize();
+            }
+            else
+            {
+                Debug.LogError("Car image index out of range!");
+            }
+        }
     }
 
     public void NextCar()

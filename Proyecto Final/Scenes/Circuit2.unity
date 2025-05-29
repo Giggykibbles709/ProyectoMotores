@@ -15889,7 +15889,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imola Grand Prix
+  m_Text: Baku Grand Prix
 --- !u!222 &1829140107
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -16108,7 +16108,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imola Grand Prix
+  m_Text: Baku Grand Prix
 --- !u!222 &1840183092
 CanvasRenderer:
   m_ObjectHideFlags: 0

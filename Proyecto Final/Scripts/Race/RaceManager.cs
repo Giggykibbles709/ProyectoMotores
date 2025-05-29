@@ -15,7 +15,7 @@ public class RaceManager : MonoBehaviour
         int selectedCar = PlayerPrefs.GetInt("SelectedCar", 0); // Obtiene el coche seleccionado del PlayerPrefs
         GameObject playerCar = Instantiate(carPrefabs[selectedCar], player.transform.position, player.transform.rotation, player.transform); // Instancia el coche seleccionado
 
-        // Asegúrate de que el objeto instanciado tenga un componente Racer
+        // Asegurarse de que el objeto instanciado tenga un componente Racer
         Racer playerRacer = playerCar.GetComponent<Racer>();
         if (playerRacer != null)
         {

@@ -32,7 +32,7 @@ public class AICarController : MonoBehaviour
     void Start()
     {
         // Asignar una velocidad máxima única para cada coche.
-        baseSpeed = Random.Range(8f, 20f);
+        baseSpeed = Random.Range(8f, 30f);
         currentSpeed = baseSpeed;
         overtakingAggressiveness = Random.Range(0.2f, 1f);
     }

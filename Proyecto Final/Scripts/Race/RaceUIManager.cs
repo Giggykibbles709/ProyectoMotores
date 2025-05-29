@@ -26,7 +26,7 @@ public class RaceUIManager : MonoBehaviour
             }
         }
 
-        // Escuchar un evento para cuando termine la cuenta atrás (puedes integrarlo según tu lógica existente)
+        // Escuchar un evento para cuando termine la cuenta atrás
         RaceEventManager.OnCountdownFinished += StartRace;
     }
 

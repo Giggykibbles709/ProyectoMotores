@@ -16866,7 +16866,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imola Grand Prix
+  m_Text: Madrid Grand Prix
 --- !u!222 &1293016726
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -26691,7 +26691,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Imola Grand Prix
+  m_Text: Madrid Grand Prix
 --- !u!222 &2020593427
 CanvasRenderer:
   m_ObjectHideFlags: 0

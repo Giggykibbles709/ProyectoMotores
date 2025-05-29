@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Racer : MonoBehaviour
 {
-    public Transform[] checkpoints; // Asignado desde el inspector
+    public Transform[] checkpoints;
     public int currentLap = 0;
     public int lastCheckpointIndex = -1;
     public float distanceToNextCheckpoint = 0f;
@@ -21,7 +21,7 @@ public class Racer : MonoBehaviour
 
     private void Start()
     {
-        // Asigna automáticamente los checkpoints buscando un objeto padre con un tag específico, por ejemplo, "Checkpoints"
+        // Asigna automáticamente los checkpoints buscando un objeto padre con un tag específico
         GameObject checkpointsParent = GameObject.FindWithTag("Checkpoints");
         if (checkpointsParent != null)
         {

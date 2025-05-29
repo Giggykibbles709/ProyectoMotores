@@ -25,7 +25,6 @@ public class SelectionManager : MonoBehaviour
 
     private void Start()
     {
-        // Inicializa el sistema cuando arranque (puedes llamar a Play() aquí o desde otro script)
         Play();
     }
 
