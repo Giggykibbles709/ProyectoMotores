@@ -2154,7 +2154,7 @@ MonoBehaviour:
   player: {fileID: 416455091}
   offset: {x: 0, y: 2, z: -4}
   followSpeed: 10
-  rotationSpeed: 5
+  rotationSpeed: 2
 --- !u!114 &399507814
 MonoBehaviour:
   m_ObjectHideFlags: 0
