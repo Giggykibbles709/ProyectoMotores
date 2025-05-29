@@ -107,7 +107,7 @@ public class RaceMenuManager : MonoBehaviour
             countdown--;
         }
 
-        countdownText.text = "¡GO!";
+        countdownText.text = "GO!";
         yield return new WaitForSeconds(1f);
         countdownText.gameObject.SetActive(false);
 

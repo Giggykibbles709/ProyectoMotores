@@ -7521,7 +7521,7 @@ GameObject:
   - component: {fileID: 1729332177}
   - component: {fileID: 1729332182}
   m_Layer: 0
-  m_Name: suv
+  m_Name: Car 3
   m_TagString: AICar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7541,7 +7541,7 @@ GameObject:
   - component: {fileID: 1038325736}
   - component: {fileID: 1038325741}
   m_Layer: 0
-  m_Name: race-future
+  m_Name: Car 2
   m_TagString: AICar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7561,7 +7561,7 @@ GameObject:
   - component: {fileID: 995525770}
   - component: {fileID: 995525775}
   m_Layer: 0
-  m_Name: hatchback-sports
+  m_Name: Car 1
   m_TagString: AICar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
