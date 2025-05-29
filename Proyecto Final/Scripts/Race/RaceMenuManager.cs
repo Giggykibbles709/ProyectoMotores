@@ -165,13 +165,6 @@ public class RaceMenuManager : MonoBehaviour
                 standingsNames[i].text = $"{i + 1}. {PlayerPrefs.GetString("PlayerName", "Player")}";
                 int playerCountryIndex = PlayerPrefs.GetInt("CountryIndex", 0);
                 standingsFlags[i].sprite = (playerCountryIndex >= 0 && playerCountryIndex < countryFlags.Length) ? countryFlags[playerCountryIndex] : null;
-
-                playerPosition = i;
-
-                if (playerPosition == 0)
-                {
-                    raceWon = true;
-                }
             }
             else
             {
@@ -211,7 +204,7 @@ public class RaceMenuManager : MonoBehaviour
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         string sceneKey = $"SceneWon_{currentSceneIndex}";
 
-        if (raceWon)
+        if (playerPosition == 0)
         {
             if (!PlayerPrefs.HasKey(sceneKey))
             {

@@ -452,14 +452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94a70f097993a843a345cc7747d82aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkpoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  checkpoints: []
   currentLap: 0
   lastCheckpointIndex: -1
   distanceToNextCheckpoint: 0

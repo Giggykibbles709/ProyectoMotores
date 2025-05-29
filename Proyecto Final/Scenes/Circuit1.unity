@@ -1245,7 +1245,7 @@ GameObject:
   - component: {fileID: 208585495}
   - component: {fileID: 208585496}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Collider ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6357,6 +6357,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 208585495}
   - {fileID: 1676470256}
   - {fileID: 1724790746}
   - {fileID: 187934046}
@@ -6367,7 +6368,6 @@ Transform:
   - {fileID: 1177463110}
   - {fileID: 2017809059}
   - {fileID: 785032508}
-  - {fileID: 208585495}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1887984964

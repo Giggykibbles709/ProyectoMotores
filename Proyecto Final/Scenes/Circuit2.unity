@@ -1312,7 +1312,7 @@ GameObject:
   - component: {fileID: 208585495}
   - component: {fileID: 208585496}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Collider ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4928,7 +4928,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1829354685}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: ebcad77f3cdf96e44893e25c68f5f8ff, type: 3}
       propertyPath: m_LocalScale.x
@@ -4960,7 +4960,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ebcad77f3cdf96e44893e25c68f5f8ff, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ebcad77f3cdf96e44893e25c68f5f8ff, type: 3}
       propertyPath: m_LocalRotation.y
@@ -4991,6 +4991,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ebcad77f3cdf96e44893e25c68f5f8ff, type: 3}
+--- !u!4 &899867172 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ebcad77f3cdf96e44893e25c68f5f8ff, type: 3}
+  m_PrefabInstance: {fileID: 899867171}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &936705506
 GameObject:
   m_ObjectHideFlags: 0
@@ -9240,10 +9245,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 208585495}
   - {fileID: 1455742797}
   - {fileID: 2126503849}
   - {fileID: 1784735412}
-  - {fileID: 208585495}
   - {fileID: 1256931603}
   - {fileID: 27875697}
   - {fileID: 2037141685}
@@ -9279,6 +9284,7 @@ Transform:
   - {fileID: 263436405}
   - {fileID: 290047847}
   - {fileID: 1374544313}
+  - {fileID: 899867172}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1887984964
@@ -12064,4 +12070,3 @@ SceneRoots:
   - {fileID: 1281243151}
   - {fileID: 540714477}
   - {fileID: 2097380875}
-  - {fileID: 899867171}
